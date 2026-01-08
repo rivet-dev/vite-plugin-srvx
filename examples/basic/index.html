@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>srvx + Vite Example</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .routes {
+      list-style: none;
+      padding: 0;
+    }
+    .routes li {
+      margin: 0.5rem 0;
+    }
+    .routes a {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .routes a:hover {
+      text-decoration: underline;
+    }
+    code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 srvx + Vite</h1>
+  <p>Universal Server powered by srvx, running with Vite dev server</p>
+
+  <div class="card">
+    <h2>Available Routes</h2>
+    <ul class="routes">
+      <li><a href="/">/</a> - This page</li>
+      <li><a href="/api/hello">/api/hello</a> - JSON API endpoint</li>
+      <li><a href="/api/time">/api/time</a> - Current server time</li>
+      <li><a href="/about">/about</a> - About page</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Features</h2>
+    <ul>
+      <li>✨ Hot Module Replacement (HMR)</li>
+      <li>🔥 Web Standard APIs (Request/Response)</li>
+      <li>⚡ Lightning fast with Vite</li>
+      <li>🌐 Universal - works with Node.js, Deno, Bun</li>
+    </ul>
+  </div>
+
+  <script type="module">
+    console.log('🎉 srvx + Vite is running!')
+    console.log('Edit src/server.ts to see HMR in action')
+  </script>
+  <script type="module" src="./frontend/main.ts"></script>
+</body>
+</html>

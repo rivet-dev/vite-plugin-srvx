@@ -1,0 +1,20 @@
+{
+  "name": "srvx-vite-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && vite build --mode server",
+    "start": "srvx --static public dist/server.js"
+  },
+  "dependencies": {
+    "srvx": "^0.9.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.5",
+    "vite-plugin-srvx": "workspace:*"
+  }
+}
