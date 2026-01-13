@@ -77,16 +77,13 @@ Create a `vite.config.ts` file:
 import { defineConfig } from 'vite'
 import srvx from 'vite-plugin-srvx'
 
-export default defineConfig(({ mode }) => ({
-  build: {
-    outDir: mode === 'server' ? 'dist' : 'dist/public',
-  },
+export default defineConfig({
   plugins: [
     ...srvx({
       entry: './src/server.ts',
     }),
   ],
-}))
+})
 ```
 
 ### 4. Run the development server
@@ -110,10 +107,8 @@ Add these scripts to your `package.json`:
 {
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "vite build",
-    "build:server": "vite build --mode server",
-    "preview": "srvx dist/server.js"
+    "build": "vite build && vite build --mode server",
+    "start": "srvx dist/server.js"
   }
 }
 ```
@@ -125,13 +120,13 @@ npm run build
 ```
 
 This will:
-1. Build your frontend (HTML, CSS, JS) to `dist/public`
-2. Build your srvx server to `dist/server.js`
+1. Build your frontend (HTML, CSS, JS) to `dist/public` (first `vite build`)
+2. Build your srvx server to `dist/server.js` (second `vite build --mode server`)
 
 Run your production build:
 
 ```bash
-npm run preview
+npm run start
 # or directly: srvx dist/server.js
 ```
 
@@ -152,6 +147,11 @@ interface SrvxOptions {
   // Server output filename (default: 'server.js')
   serverOutFile?: string
 
+  // Target framework for deployment (e.g., 'vercel')
+  // When set to 'vercel' OR when VERCEL=1 env var is set (auto-detected),
+  // outputs to dist/api/index.js for Vercel Edge Functions
+  framework?: 'vercel'
+
   // Development server options
   // Patterns to exclude from the srvx handler (will be handled by Vite instead)
   exclude?: (string | RegExp)[]
@@ -164,7 +164,7 @@ interface SrvxOptions {
 }
 ```
 
-> **Note:** The plugin returns an array of two plugins (dev server + build), so use the spread operator: `...srvx({})`
+> **Note:** The plugin returns an array of three plugins (dev server + client build + server build), so use the spread operator: `...srvx({})`
 
 ### Example with custom options
 
@@ -173,9 +173,6 @@ import { defineConfig } from 'vite'
 import srvx from 'vite-plugin-srvx'
 
 export default defineConfig(({ mode }) => ({
-  build: {
-    outDir: mode === 'server' ? 'build' : 'build/public',
-  },
   plugins: [
     ...srvx({
       entry: './src/server.ts',
@@ -194,11 +191,13 @@ export default defineConfig(({ mode }) => ({
 
 Then build with:
 ```bash
-npm run build:client  # builds to build/public
-npm run build:server  # builds to build/app.js
+npm run build
+# This runs: vite build && vite build --mode server
+# - Client build outputs to build/public
+# - Server build outputs to build/app.js
 ```
 
-And run: `srvx build/app.js` (it will serve static files from `build/public`)
+And run: `srvx build/app.js` (it will automatically serve static files from `build/public`)
 
 ### Using Individual Plugins (Advanced)
 
@@ -206,15 +205,13 @@ If you need more control, you can import the plugins separately:
 
 ```typescript
 import { defineConfig } from 'vite'
-import { devServer, srvxBuild } from 'vite-plugin-srvx'
+import { devServer, clientBuild, srvxBuild } from 'vite-plugin-srvx'
 
 export default defineConfig(({ mode }) => ({
-  build: {
-    outDir: mode === 'server' ? 'dist' : 'dist/public',
-  },
   plugins: [
     devServer({ entry: './src/server.ts' }),
-    srvxBuild({ entry: './src/server.ts' }),
+    clientBuild({ outDir: 'dist' }),
+    srvxBuild({ entry: './src/server.ts', outDir: 'dist' }),
   ],
 }))
 ```
@@ -235,16 +232,18 @@ The `devServer` plugin creates a Vite middleware that:
 
 ### Production Build
 
-The `srvxBuild` plugin uses Vite's mode system:
+The plugin uses Vite's mode system with three separate plugins:
 
 1. **Client build** (`vite build`):
+   - `clientBuild` plugin is active (mode !== 'server')
    - Builds frontend to `dist/public`
-   - Plugin is inactive (mode !== 'server')
+   - `srvxBuild` plugin is inactive
 
 2. **Server build** (`vite build --mode server`):
-   - Plugin activates (mode === 'server')
+   - `srvxBuild` plugin is active (mode === 'server')
    - Sets `ssr: true` via the `config` hook
    - Builds server to `dist/server.js`
+   - `clientBuild` plugin is inactive
 
 3. **Run with srvx**:
    - `srvx dist/server.js`
@@ -254,16 +253,18 @@ This approach follows the same pattern as [@hono/vite-build](https://github.com/
 
 This gives you the best of both worlds: srvx's universal server API and Vite's lightning-fast development experience!
 
-## Example
+## Examples
 
-Check out the [example](./example) directory for a full working example.
+Check out the [examples](./examples) directory for full working examples:
+- [examples/basic](./examples/basic) - Basic srvx + Vite setup
+- [examples/vercel](./examples/vercel) - Vercel Edge Functions deployment
 
-To run the example:
+To run an example:
 
 ```bash
 pnpm install
 pnpm build
-cd example
+cd examples/basic  # or examples/vercel
 pnpm dev
 ```
 
