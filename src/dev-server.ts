@@ -132,7 +132,8 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 			method: req.method,
 			headers,
 			body: body as any,
-		});
+			duplex: 'half',
+		} as RequestInit);
 
 		const response = await app.fetch(request);
 
