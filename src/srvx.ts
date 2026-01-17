@@ -30,6 +30,7 @@ export function srvx(options?: SrvxOptions): Plugin[] {
 			exclude: mergedOptions.exclude,
 			injectClientScript: mergedOptions.injectClientScript,
 			loadModule: mergedOptions.loadModule,
+			prefix: mergedOptions.prefix,
 		}),
 
 		// Client build plugin
