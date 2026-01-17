@@ -14,7 +14,7 @@ export interface SrvxOptions extends DevServerOptions {
 }
 
 export const defaultSrvxOptions: Partial<SrvxOptions> = {
-	entry: "./src/server.ts",
+	entry: "./api/index.ts",
 	outDir: "dist",
 	clientOutDir: "public",
 	serverOutFile: "server.js",
