@@ -12,7 +12,7 @@ export interface DevServerOptions {
 }
 
 export const defaultOptions: Partial<DevServerOptions> = {
-	entry: "./src/server.ts",
+	entry: "./api/index.ts",
 	exclude: [
 		/.*\.tsx?$/,
 		/.*\.ts$/,

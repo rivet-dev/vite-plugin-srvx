@@ -9,7 +9,7 @@ export interface BuildOptions {
 }
 
 export const defaultBuildOptions: Partial<BuildOptions> = {
-  entry: './src/server.ts',
+  entry: './api/index.ts',
   outDir: 'dist',
   serverOutFile: 'server.js',
 }
