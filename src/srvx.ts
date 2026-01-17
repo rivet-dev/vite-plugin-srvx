@@ -8,11 +8,15 @@ export interface SrvxOptions extends DevServerOptions {
 	outDir?: string;
 	serverOutFile?: string;
 	framework?: "vercel"; // Target framework for deployment
+	// Client build options
+	clientOutDir?: string; // Client output directory (default: "public")
+	clientEmptyOutDir?: boolean; // Whether to empty the client output directory before build (default: true)
 }
 
 export const defaultSrvxOptions: Partial<SrvxOptions> = {
 	entry: "./src/server.ts",
 	outDir: "dist",
+	clientOutDir: "public",
 	serverOutFile: "server.js",
 };
 
@@ -30,7 +34,8 @@ export function srvx(options?: SrvxOptions): Plugin[] {
 
 		// Client build plugin
 		clientBuild({
-			outDir: mergedOptions.outDir,
+			outDir: mergedOptions.clientOutDir,
+			emptyOutDir: mergedOptions.clientEmptyOutDir,
 		}),
 
 		// Server build plugin
