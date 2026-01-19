@@ -96,18 +96,20 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 		const base = config.base === "/" ? "" : config.base;
 		const serverRoutes = options.serverRoutes;
 
+		// Strip query string for pattern matching
+		const urlPath = req.url?.split("?")[0] || "/";
+
 		// Check excluded patterns (vite assets, source files, etc) - pass to Vite
 		const exclude = options.exclude ?? defaultOptions.exclude ?? [];
 		for (const pattern of exclude) {
-			if (req.url) {
-				if (pattern instanceof RegExp) {
-					if (pattern.test(req.url)) {
-						return next();
-					}
-				} else if (typeof pattern === "string") {
-					if (req.url.startsWith(pattern)) {
-						return next();
-					}
+			if (pattern instanceof RegExp) {
+				// Test both with and without query string for regex patterns
+				if (pattern.test(urlPath) || pattern.test(req.url || "")) {
+					return next();
+				}
+			} else if (typeof pattern === "string") {
+				if (urlPath.startsWith(pattern) || req.url?.startsWith(pattern)) {
+					return next();
 				}
 			}
 		}
