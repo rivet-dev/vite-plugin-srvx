@@ -18,6 +18,7 @@ export interface DevServerOptions {
 
 export const defaultOptions: Partial<DevServerOptions> = {
 	entry: "./src/server.ts",
+	serverRoutes: ["/api/*"],
 	exclude: [
 		/.*\.tsx?$/,
 		/.*\.ts$/,
