@@ -100,23 +100,30 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 		// Strip query string for pattern matching
 		const urlPath = req.url?.split("?")[0] || "/";
 
+		// Check serverRoutes FIRST - these always go to the server regardless of exclude patterns
+		const isServerRouteMatch = serverRoutes && serverRoutes.length > 0 && isServerRoute(req.url || "/", serverRoutes);
+
 		// Check excluded patterns (vite assets, source files, etc) - pass to Vite
-		const exclude = options.exclude ?? defaultOptions.exclude ?? [];
-		for (const pattern of exclude) {
-			if (pattern instanceof RegExp) {
-				// Test both with and without query string for regex patterns
-				if (pattern.test(urlPath) || pattern.test(req.url || "")) {
-					return next();
-				}
-			} else if (typeof pattern === "string") {
-				if (urlPath.startsWith(pattern) || req.url?.startsWith(pattern)) {
-					return next();
+		// But skip this check if the URL matches a server route
+		if (!isServerRouteMatch) {
+			const exclude = options.exclude ?? defaultOptions.exclude ?? [];
+			for (const pattern of exclude) {
+				if (pattern instanceof RegExp) {
+					// Test both with and without query string for regex patterns
+					if (pattern.test(urlPath) || pattern.test(req.url || "")) {
+						return next();
+					}
+				} else if (typeof pattern === "string") {
+					if (urlPath.startsWith(pattern) || req.url?.startsWith(pattern)) {
+						return next();
+					}
 				}
 			}
 		}
 
 		// Check if file exists in public dir - pass to Vite
-		if (req.url?.startsWith(base)) {
+		// But skip this check if the URL matches a server route
+		if (!isServerRouteMatch && req.url?.startsWith(base)) {
 			const publicDir = config.publicDir;
 			if (publicDir && fs.existsSync(publicDir)) {
 				const filePath = path.join(publicDir, req.url.replace(base, ""));
@@ -129,7 +136,7 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 		// If serverRoutes is defined, check if this URL should go to the server
 		// If not a server route, serve index.html for SPA support
 		if (serverRoutes && serverRoutes.length > 0) {
-			if (!isServerRoute(req.url || "/", serverRoutes)) {
+			if (!isServerRouteMatch) {
 				// Not a server route - serve index.html for SPA
 				if (await serveIndexHtml(server, req, res)) {
 					return;
