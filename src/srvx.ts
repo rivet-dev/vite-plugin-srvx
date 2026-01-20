@@ -28,6 +28,7 @@ export function srvx(options?: SrvxOptions): Plugin[] {
 		devServer({
 			entry: mergedOptions.entry,
 			exclude: mergedOptions.exclude,
+			serverRoutes: mergedOptions.serverRoutes,
 			injectClientScript: mergedOptions.injectClientScript,
 			loadModule: mergedOptions.loadModule,
 		}),

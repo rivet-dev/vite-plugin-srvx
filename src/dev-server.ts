@@ -6,6 +6,8 @@ import type { Plugin, ViteDevServer } from "vite";
 export interface DevServerOptions {
 	entry?: string;
 	exclude?: (string | RegExp)[];
+	/** Routes that should always be handled by the server, even if they match exclude patterns */
+	serverRoutes?: (string | RegExp)[];
 	injectClientScript?: boolean;
 	loadModule?: (server: ViteDevServer, entry: string) => Promise<any>;
 }
@@ -62,17 +64,47 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 			}
 		}
 
-		const exclude = options.exclude ?? defaultOptions.exclude ?? [];
+		// Check if URL matches serverRoutes (these take priority over exclude patterns)
+		const serverRoutes = options.serverRoutes ?? [];
+		let isServerRoute = false;
 
-		for (const pattern of exclude) {
+		for (const pattern of serverRoutes) {
 			if (req.url) {
 				if (pattern instanceof RegExp) {
 					if (pattern.test(req.url)) {
-						return next();
+						isServerRoute = true;
+						break;
 					}
 				} else if (typeof pattern === "string") {
-					if (req.url.startsWith(pattern)) {
-						return next();
+					// Support glob-style patterns like "/api/*"
+					if (pattern.endsWith("/*")) {
+						const prefix = pattern.slice(0, -1); // Remove the "*"
+						if (req.url.startsWith(prefix) || req.url === prefix.slice(0, -1)) {
+							isServerRoute = true;
+							break;
+						}
+					} else if (req.url.startsWith(pattern)) {
+						isServerRoute = true;
+						break;
+					}
+				}
+			}
+		}
+
+		// Only check exclude patterns if this is not a server route
+		if (!isServerRoute) {
+			const exclude = options.exclude ?? defaultOptions.exclude ?? [];
+
+			for (const pattern of exclude) {
+				if (req.url) {
+					if (pattern instanceof RegExp) {
+						if (pattern.test(req.url)) {
+							return next();
+						}
+					} else if (typeof pattern === "string") {
+						if (req.url.startsWith(pattern)) {
+							return next();
+						}
 					}
 				}
 			}
