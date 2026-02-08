@@ -63,15 +63,16 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 		}
 
 		const exclude = options.exclude ?? defaultOptions.exclude ?? [];
+		const urlPath = req.url?.split("?")[0];
 
 		for (const pattern of exclude) {
 			if (req.url) {
 				if (pattern instanceof RegExp) {
-					if (pattern.test(req.url)) {
+					if (pattern.test(req.url) || (urlPath && pattern.test(urlPath))) {
 						return next();
 					}
 				} else if (typeof pattern === "string") {
-					if (req.url.startsWith(pattern)) {
+					if (req.url.startsWith(pattern) || (urlPath && urlPath.startsWith(pattern))) {
 						return next();
 					}
 				}
