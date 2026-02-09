@@ -29,7 +29,6 @@ export const defaultOptions: Partial<DevServerOptions> = {
 		/.*\.webp$/,
 		/^\/@.+$/,
 		/^\/node_modules\/.*/,
-		/\?import$/,
 	],
 	injectClientScript: true,
 };
@@ -66,13 +65,13 @@ function createMiddleware(server: ViteDevServer, options: DevServerOptions) {
 		const urlPath = req.url?.split("?")[0];
 
 		for (const pattern of exclude) {
-			if (req.url) {
+			if (urlPath) {
 				if (pattern instanceof RegExp) {
-					if (pattern.test(req.url) || (urlPath && pattern.test(urlPath))) {
+					if (pattern.test(urlPath)) {
 						return next();
 					}
 				} else if (typeof pattern === "string") {
-					if (req.url.startsWith(pattern) || (urlPath && urlPath.startsWith(pattern))) {
+					if (urlPath.startsWith(pattern)) {
 						return next();
 					}
 				}
