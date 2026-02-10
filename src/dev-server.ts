@@ -8,6 +8,7 @@ export interface DevServerOptions {
 	exclude?: (string | RegExp)[];
 	injectClientScript?: boolean;
 	loadModule?: (server: ViteDevServer, entry: string) => Promise<any>;
+	prefix?: string;
 }
 
 export const defaultOptions: Partial<DevServerOptions> = {
@@ -196,7 +197,12 @@ export function devServer(options?: DevServerOptions): Plugin {
 				entry,
 			};
 
-			server.middlewares.use(createMiddleware(server, mergedOptions));
+			const middleware = createMiddleware(server, mergedOptions);
+			if (mergedOptions.prefix) {
+				server.middlewares.use(mergedOptions.prefix, middleware);
+			} else {
+				server.middlewares.use(middleware);
+			}
 		},
 	};
 }
